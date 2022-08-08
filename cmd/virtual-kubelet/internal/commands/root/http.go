@@ -37,6 +37,20 @@ func getAPIConfig(c Opts) (*apiServerConfig, error) {
 		CACertPath: os.Getenv("APISERVER_CA_CERT_LOCATION"),
 	}
 
+	/* early check for config and ENV */
+	_, e := os.Stat(config.CertPath)
+	if e != nil {
+		if os.IsNotExist(e) {
+			return nil, fmt.Errorf("APISERVER_CERT_LOCATION unavailable")
+		}
+	}
+	_, e = os.Stat(config.KeyPath)
+	if e != nil {
+		if os.IsNotExist(e) {
+			return nil, fmt.Errorf("APISERVER_KEY_LOCATION unavailable")
+		}
+	}
+
 	config.Addr = fmt.Sprintf(":%d", c.ListenPort)
 	config.MetricsAddr = c.MetricsAddr
 	config.StreamIdleTimeout = c.StreamIdleTimeout

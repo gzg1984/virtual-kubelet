@@ -13,25 +13,36 @@ The best description is "Kubernetes API on top, programmable back."
 
 #### Table of Contents
 
-* [How It Works](#how-it-works)
-* [Usage](#usage)
-* [Providers](#providers)
-    + [Admiralty Multi-Cluster Scheduler](#admiralty-multi-cluster-scheduler)
-    + [Alibaba Cloud ECI Provider](#alibaba-cloud-eci-provider)
-    + [Azure Container Instances Provider](#azure-container-instances-provider)
-	+ [Azure Batch GPU Provider](https://github.com/virtual-kubelet/azure-batch/blob/master/README.md)
-    + [AWS Fargate Provider](#aws-fargate-provider)
-    + [Elotl Kip](#elotl-kip)
-	+ [HashiCorp Nomad](#hashicorp-nomad-provider)
-    + [Liqo](#liqo-provider)
-    + [OpenStack Zun](#openstack-zun-provider)
-    + [Tensile Kube Provider](#tensile-kube-provider)
-    + [Adding a New Provider via the Provider Interface](#adding-a-new-provider-via-the-provider-interface)
-* [Testing](#testing)
-    + [Unit tests](#unit-tests)
-    + [End-to-end tests](#end-to-end-tests)
-* [Known quirks and workarounds](#known-quirks-and-workarounds)
-* [Contributing](#contributing)
+- [Virtual Kubelet](#virtual-kubelet)
+      - [Table of Contents](#table-of-contents)
+  - [How It Works](#how-it-works)
+  - [Usage](#usage)
+  - [Current Features](#current-features)
+  - [Providers](#providers)
+    - [Admiralty Multi-Cluster Scheduler](#admiralty-multi-cluster-scheduler)
+    - [Alibaba Cloud ECI Provider](#alibaba-cloud-eci-provider)
+      - [Configuration File](#configuration-file)
+    - [Azure Container Instances Provider](#azure-container-instances-provider)
+      - [Configuration File](#configuration-file-1)
+    - [AWS Fargate Provider](#aws-fargate-provider)
+    - [Elotl Kip](#elotl-kip)
+    - [HashiCorp Nomad Provider](#hashicorp-nomad-provider)
+    - [Liqo Provider](#liqo-provider)
+    - [OpenStack Zun Provider](#openstack-zun-provider)
+    - [Tensile Kube Provider](#tensile-kube-provider)
+    - [Adding a New Provider via the Provider Interface](#adding-a-new-provider-via-the-provider-interface)
+      - [PodLifecylceHandler](#podlifecylcehandler)
+      - [NodeProvider](#nodeprovider)
+      - [API endpoints](#api-endpoints)
+      - [Scrape Pod metrics](#scrape-pod-metrics)
+  - [Testing](#testing)
+    - [Unit tests](#unit-tests)
+    - [End-to-end tests](#end-to-end-tests)
+  - [Known quirks and workarounds](#known-quirks-and-workarounds)
+    - [Missing Load Balancer IP addresses for services](#missing-load-balancer-ip-addresses-for-services)
+      - [Providers that do not support service discovery](#providers-that-do-not-support-service-discovery)
+      - [Workaround](#workaround)
+  - [Contributing](#contributing)
 
 ## How It Works
 
@@ -49,7 +60,10 @@ https://godoc.org/github.com/virtual-kubelet/virtual-kubelet
 
 There are implementations available for [several providers](#providers), see
 those repos for details on how to deploy.
-
+- 好消息：安装可参考文档
+  - https://virtual-kubelet.io/docs/setup/
+- 坏消息：照着安装文档做无法启动VK
+  - 本项目就是为了解决VK无法启动而创建 
 ## Current Features
 
 - create, delete and update pods

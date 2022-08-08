@@ -24,6 +24,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/virtual-kubelet/virtual-kubelet/cmd/virtual-kubelet/internal/provider"
+	"github.com/virtual-kubelet/virtual-kubelet/cmd/virtual-kubelet/internal/provider/mock"
 	"github.com/virtual-kubelet/virtual-kubelet/errdefs"
 	"github.com/virtual-kubelet/virtual-kubelet/internal/manager"
 	"github.com/virtual-kubelet/virtual-kubelet/log"
@@ -102,6 +103,19 @@ func runRootCommand(ctx context.Context, s *provider.Store, c Opts) error {
 		return p, nil, nil
 	}
 
+	/* Get API Configure if provider specified it */
+	pGetConfig := s.GetAPIServer(c.Provider)
+	if pGetConfig == nil {
+		/* just ignore */
+	} else {
+		p, err := pGetConfig()
+		if err != nil {
+			return errors.Wrapf(err, "error pGetConfig provider %s", c.Provider)
+		}
+		os.Setenv("APISERVER_CERT_LOCATION", p.CertPath)
+		os.Setenv("APISERVER_KEY_LOCATION", p.KeyPath)
+	}
+
 	apiConfig, err := getAPIConfig(c)
 	if err != nil {
 		return err
@@ -128,11 +142,20 @@ func runRootCommand(ctx context.Context, s *provider.Store, c Opts) error {
 		return nil
 	},
 		setAuth(c.NodeName, apiConfig),
+		/* TODO: skip this step if there is fake provider api server*/
 		nodeutil.WithTLSConfig(
 			nodeutil.WithKeyPairFromPath(apiConfig.CertPath, apiConfig.KeyPath),
 			maybeCA(apiConfig.CACertPath),
 		),
 		nodeutil.AttachProviderRoutes(mux),
+		/* this is for provider who provide fake k8s api server*/
+		func(cfg *nodeutil.NodeConfig) error {
+			pGetConfig := s.GetAPIServer(c.Provider)
+			if pGetConfig != nil {
+				cfg.Client = mock.MockGlobleApiServerClient
+			}
+			return nil
+		},
 	)
 	if err != nil {
 		return err

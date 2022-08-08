@@ -15,4 +15,12 @@ func registerMock(s *provider.Store) {
 			cfg.DaemonPort,
 		)
 	})
+
+	s.RegisterAPIServer("mock", func() (*provider.OverlayAPIServerConfig, error) { //nolint:errcheck
+		return &provider.OverlayAPIServerConfig{
+			CertPath: "/root/virtual-kubelet/hack/skaffold/virtual-kubelet/vkubelet-mock-0-crt.pem",
+			KeyPath:  "/root/virtual-kubelet/hack/skaffold/virtual-kubelet/vkubelet-mock-0-key.pem",
+		}, nil
+
+	})
 }

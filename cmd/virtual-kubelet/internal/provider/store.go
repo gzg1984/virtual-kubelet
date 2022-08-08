@@ -9,13 +9,15 @@ import (
 
 // Store is used for registering/fetching providers
 type Store struct {
-	mu sync.Mutex
-	ls map[string]InitFunc
+	mu        sync.Mutex
+	ls        map[string]InitFunc
+	apiConfig map[string]GetAPIConfigFunc
 }
 
 func NewStore() *Store { // nolint:golint
 	return &Store{
-		ls: make(map[string]InitFunc),
+		ls:        make(map[string]InitFunc),
+		apiConfig: make(map[string]GetAPIConfigFunc),
 	}
 }
 
@@ -28,6 +30,33 @@ func (s *Store) Register(name string, f InitFunc) error {
 	s.ls[name] = f
 	s.mu.Unlock()
 	return nil
+}
+
+/*
+RegisterAPIServer is used to add
+API Server config
+for a provider
+*/
+func (s *Store) RegisterAPIServer(name string, f GetAPIConfigFunc) error {
+	if f == nil {
+		return errdefs.InvalidInput("provided GetAPIConfigFunc function cannot not be nil")
+	}
+	s.mu.Lock()
+	s.apiConfig[name] = f
+	s.mu.Unlock()
+	return nil
+}
+
+/*
+GetAPIServer is used to get
+API Server config
+for a provider
+*/
+func (s *Store) GetAPIServer(name string) GetAPIConfigFunc {
+	s.mu.Lock()
+	f := s.apiConfig[name]
+	s.mu.Unlock()
+	return f
 }
 
 // Get gets the registered init func for the given name
@@ -72,3 +101,17 @@ type InitConfig struct {
 }
 
 type InitFunc func(InitConfig) (Provider, error) // nolint:golint
+
+/*
+OverlayAPIServerConfig is used to setup apiserver from provider
+*/
+type OverlayAPIServerConfig struct {
+	CertPath string
+	KeyPath  string
+}
+
+/*
+GetAPIConfigFunc is used to
+get overlay config
+*/
+type GetAPIConfigFunc func() (*OverlayAPIServerConfig, error)

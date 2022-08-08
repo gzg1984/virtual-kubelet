@@ -45,7 +45,7 @@ func WithKeyPairFromPath(cert, key string) func(*tls.Config) error {
 	return func(cfg *tls.Config) error {
 		cert, err := tls.LoadX509KeyPair(cert, key)
 		if err != nil {
-			return err
+			return fmt.Errorf("LoadX509KeyPair error:%v", err)
 		}
 		cfg.Certificates = append(cfg.Certificates, cert)
 		return nil
